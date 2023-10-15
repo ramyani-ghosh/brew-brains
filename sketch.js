@@ -7,8 +7,8 @@ let palettes = [[[70,80,30,70,120,150],[40,70,70,120,120,180],[80,255,0,100,50,2
 ];
 
 var palette;
-var lowfreq = [115,130,160,200]
-var highfreq = [200,280,360,440]
+var lowfreq = [115,160,190,250,90]
+var highfreq = [200,280,360,440,100]
 let symmetry = 10;  
 let angle = 360 / symmetry;
 let slider;
@@ -19,8 +19,24 @@ var divider = 100;
 //Choose frequency mode depending on level of noise
 let freqmode = lowfreq;
 
+// Get the canvas and its context
+const canvas = document.getElementById('combinedCanvas');
+const ctx = canvas.getContext('2d');
+canvas.style.display="none";
+
+const image2 = new Image();
+image2.src = 'posttcard.png';
+
+image2.onload = function() {
+  // Draw the image on the canvas
+  ctx.drawImage(image2, canvas.width/2+10, 50, canvas.width/2-50, 400);
+};
+
 function setup() { 
-  createCanvas(windowWidth, windowHeight);
+  
+  var cnv= createCanvas(windowWidth, windowHeight+70);
+  cnv.style('display', 'block');  // This makes the canvas take up the whole window
+  fullscreen(true);
   mywidth = int(windowWidth/2);
   myheight = int(windowHeight/2);
   angleMode(DEGREES);
@@ -34,12 +50,32 @@ function setup() {
 
   //Color palette choice is random
   palette = palettes[int(random(4))];
+  symmetry = random(5,7);
+  angle = 360 / symmetry;
 }
 
-// Save File Function
 function saveFile() {
-  file_name = "postcard" + int(random(10000)) + ".jpg";
-  save(file_name);
+  // Convert canvas data to a Blob
+  const canvasmain = document.getElementById('defaultCanvas0');
+  canvasmain.toBlob(function(blob) {
+    // Create a Blob URL
+    const blobUrl = URL.createObjectURL(blob);
+
+     // Create a new Image element
+     const img = new Image();
+
+     // Set the source of the Image to the Blob URL
+     img.src = blobUrl;
+ 
+     // Wait for the image to load
+     img.onload = function() {
+       // Draw the image on the canvas
+       //const ctx = canvasmain.getContext('2d');
+       canvasmain.style.display = "none";
+       ctx.drawImage(img, 50, 50, canvas.width/2-70, 400);
+       canvas.style.display="block";
+     }
+  }, 'image/jpeg'); // Specify the image format if needed (e.g., 'image/png')
 }
 
 //Initial starting positions
@@ -66,7 +102,7 @@ function draw() {
   //translate image to scale to the canvas
   translate(width / 2, height / 2);
 
-  if (freq>20)   { 
+  if (freq>freqmode[4])   { 
     console.log(width);
     let mx =  rx - width / 2;
     let my =  ry - height / 2;
@@ -75,7 +111,7 @@ function draw() {
     prx = rx;
     pry = ry;
     
-    if(my > myheight+400) {
+    if(my > myheight+300) {
 
           //Reset center position, new symmetry value, and updated radial jump forward value.
           divider = int(random(1,4))*100;
