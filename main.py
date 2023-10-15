@@ -1,5 +1,6 @@
 import datetime
 import os
+import threading
 import time
 import webbrowser
 import speech_recognition as sr
@@ -32,29 +33,29 @@ class SimpleGroupedColorFunc(object):
 
     def __call__(self, word, **kwargs):
         return self.word_to_color.get(word, self.default_color)
-def microphone():
-    exec_end_time = datetime.datetime.now() + datetime.timedelta(seconds=30)
-    f = open("speechfile.txt", "w")
-    while datetime.datetime.now() < exec_end_time: 
-          try:
-              with sr.Microphone() as source:
-                  # wait for a second to let the recognizer
-                  # adjust the energy threshold based on
-                  # the surrounding noise level
-                  r.adjust_for_ambient_noise(source, duration=0.2)
-                  print("Recording... ")
-                  # listens for the user's input
-                  audio = r.listen(source)
-                  text = r.recognize_google(audio, language="en-US")
-                  text = text.lower() 
-                  # tb = blob(text)
-                  f.write(text)
-                  print(text)
-                  # print(tb.sentiment)
-          except sr.RequestError as e:
-              print("Could not request results; {0}".format(e))
-          except sr.UnknownValueError:
-              print("Speak!! I can't hear you.")
+
+def microphone(duration=40):
+    # exec_end_time = datetime.datetime.now() + datetime.timedelta(seconds=10)
+    end_time = time.time() + duration
+    with open("speechfile.txt", "w") as f:
+        while time.time() < end_time:
+            try:
+                with sr.Microphone() as source:
+                    r.adjust_for_ambient_noise(source, duration=0.3)
+                    print("Recording... ")
+                    audio = r.listen(source)
+                    text = r.recognize_google(audio, language="en-US")
+                    text = text.lower()
+                    if text == "stop":
+                        break
+                    f.write(text)
+                    print(text)
+            except sr.RequestError as e:
+                print("Could not request results; {0}".format(e))
+            except sr.UnknownValueError:
+                print("Speak!! I can't hear you.")
+
+
 
 
 # creating function that tokenizes text, lowers letters and removes punctuation, disgarding words included in stopword list
@@ -66,19 +67,6 @@ def preprocess_text(text):
     data_token = [token.lower() for token in tokens]
     processed_words = [w for w in data_token if not w in stop_words]
     return processed_words
-
-def open_html_files():
-    url_index = "http://127.0.0.1:5500/index.html"
-    webbrowser.open(url_index, new=2)  # Open in a new tab
-
-    # Wait for a short time before starting the microphone
-    # Adjust the sleep duration based on the loading time of your HTML page
-    # time.sleep(3)  # Example: wait for 5 seconds
-    microphone()
-
-def open_postcard():
-    url_postcard = "http://127.0.0.1:5500/postcard.html"
-    webbrowser.open(url_postcard, new=2)  # Open in a new tab
 
 def wordcloud(cleaned_text):
     # convert list to string and generate
@@ -139,7 +127,11 @@ def sentiment_mapping(list):
             print("vn",i)
 
 if __name__ == '__main__':
-    open_html_files()
+    time.sleep(3) 
+    url_index = "http://127.0.0.1:5500/"
+    webbrowser.open(url_index)  # Open in a new tab
+     # Run microphone function in a separate thread for 10 seconds
+    microphone()
     # Creating stopword list from nlkt
     f = open("speechfile.txt", "r")
     meta_text = f.read()
@@ -149,7 +141,6 @@ if __name__ == '__main__':
     sentiment_mapping(cleaned_text)
     unique_words = list(set(cleaned_text))
     wordcloud(cleaned_text)
-    url = "http://127.0.0.1:5500/postcard.html"
-    open_postcard()
+    
 
 
