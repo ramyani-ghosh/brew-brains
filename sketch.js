@@ -10,17 +10,18 @@
 
 let palettes = [[[0,70,70,110,140,180],[0,70,140,170,140,200],[80,255,0,100,50,200],[80,255,0,100,50,200],[200,255,80,120,180,220]],
               [[50,80,100,190,100,140],[0,70,70,110,140,180],[70,90,100,210,80,200],[140,255,100,255,90,120],[240,255,200,230,120,160]],
-                [[30,80,40,80,120,180],[40,100,40,100,100,170],[70,90,70,110,150,190],[90,130,100,180,160,240],[180,210,160,200,230,255]]
+                [[30,80,40,80,120,180],[40,100,40,100,100,170],[70,90,70,110,150,190],[90,130,100,180,160,240],[180,210,160,200,230,255]],
+                [[80,130,50,100,50,130],[100,150,50,90,50,80],[170,210,90,120,80,90],[170,220,90,110,90,120],[240,255,200,220,150,190]]
 ];
 var palette;
 var lowfreq = [115,130,160,200]
-var highfreq = [100,10,220,400]
+var highfreq = [170,200,290,400]
 let symmetry = 5;  
 let angle = 360 / symmetry;
 let saveButton, clearButton, mouseButton, keyboardButton;
 let slider;
 
-let freqmode = lowfreq;
+let freqmode = highfreq;
 
 
 function setup() { 
@@ -51,7 +52,7 @@ function setup() {
   // start the Audio Input.
   // By default, it does not .connect() (to the computer speakers)
   mic.start();
-  palette = palettes[int(random(3))];
+  palette = palettes[int(random(4))];
 }
 
 // Save File Function
@@ -84,7 +85,7 @@ function draw() {
   if (frameCount == 60*30) {
     noLoop();
     saveFile();
-    
+    console.log("Your aural visual is ready :)");
   }
   
   
